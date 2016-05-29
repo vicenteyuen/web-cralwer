@@ -3,9 +3,12 @@
  */
 package com.ma.bi.webcralwer.processors.yoox;
 
+import java.util.List;
+
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.selector.Selectable;
 
 /**
  * @author vison
@@ -30,7 +33,18 @@ public class YooxMenPageProcessor implements PageProcessor {
 	@Override
 	public void process(Page page) {
 		// TODO Auto-generated method stub
-		System.out.println(page.getHtml());
+		Selectable  st = page.getHtml().xpath("//a[@class='topFiltersTracking']");
+
+
+		List<String> matchLinks = st.all();
+		
+		for (String matchLink : matchLinks) {
+			//System.out.println(matchLink);
+		}
+		
+		System.out.println("links " + st.links());
+		
+
 
 	}
 

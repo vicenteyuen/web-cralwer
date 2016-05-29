@@ -24,7 +24,7 @@ public class MenPageProcessorTest {
 		YooxMenPageProcessor pp = new YooxMenPageProcessor();
 		
 		Spider.create(pp)
-        //从"https://github.com/code4craft"开始抓
+        //从 男士下的品牌开始获取数据
         .addUrl("http://www.yoox.cn/cn/%E7%94%B7%E5%A3%AB")
         //开启5个线程抓取
         .thread(5)
