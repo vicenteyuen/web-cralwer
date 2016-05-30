@@ -34,15 +34,11 @@ public class YooxMenPageProcessor implements PageProcessor {
 	public void process(Page page) {
 		// TODO Auto-generated method stub
 		Selectable  st = page.getHtml().xpath("//a[@class='topFiltersTracking']");
+		
 
 
-		List<String> matchLinks = st.all();
-		
-		for (String matchLink : matchLinks) {
-			//System.out.println(matchLink);
-		}
-		
-		System.out.println("links " + st.links());
+
+
 		
 
 
