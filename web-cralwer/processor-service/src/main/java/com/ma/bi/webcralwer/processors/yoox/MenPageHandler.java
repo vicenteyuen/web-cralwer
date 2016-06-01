@@ -8,36 +8,36 @@ import java.util.Iterator;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
-import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.processor.PageProcessor;
+
+import com.ma.bi.webcralwer.handle.PageHandler;
 
 /**
- * @author vison
+ * @author ruanweibiao
  *
  */
-public class YooxMenPageProcessor implements PageProcessor {
+public class MenPageHandler implements PageHandler {
 
-	private Site site = Site.me().setRetryTimes(3).setSleepTime(1000);		
+	private static Logger logger = LoggerFactory.getLogger( MenPageHandler.class );		
 	
-	/* (non-Javadoc)
-	 * @see us.codecraft.webmagic.processor.PageProcessor#getSite()
+	/**
+	 * 
 	 */
-	@Override
-	public Site getSite() {
-		// TODO Auto-generated method stub
-		return site;
+	public MenPageHandler() {
+		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
-	 * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
+	 * @see com.ma.bi.webcralwer.handle.PageHandler#handle(us.codecraft.webmagic.Page)
 	 */
 	@Override
-	public void process(Page page) {
+	public void handle(Page page) {
 		// TODO Auto-generated method stub
-		//Selectable  st = page.getHtml().xpath("//a[@class='topFiltersTracking']");
+		
 		Document doc = page.getHtml().getDocument();
 		
 		Elements elems = doc.select( "a.topFiltersTracking" );
@@ -46,10 +46,11 @@ public class YooxMenPageProcessor implements PageProcessor {
 		while (iter.hasNext()) {
 			Element ele = iter.next();
 			String urlLink = ele.attr("href");
-			System.out.println(ele);
+
 			// ---- get the infomation ---
 			
 			String dataType = ele.attr("data-type");
+			Request req = new Request(urlLink);
 			
 			// --- handle brand designer
 			if ( "topDesigners".equalsIgnoreCase(dataType) ) {
@@ -59,19 +60,17 @@ public class YooxMenPageProcessor implements PageProcessor {
 			else if ("topCategories".equalsIgnoreCase(dataType) || "categories".equalsIgnoreCase(dataType) ) {
 				
 			}
+
 			
 			// --- add the category and brand --
-			page.addTargetRequest(new Request(urlLink));
-
+			page.addTargetRequest(req);
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("Add Request : " + urlLink);
+			}
+			
 		}
-
-
-
-
-
 		
-
-
 	}
 
 }
