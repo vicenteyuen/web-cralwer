@@ -2,11 +2,17 @@ package com.ma.bi.webcralwer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
+
+
 
 public class LevelDBState implements State {
 	
@@ -34,6 +40,32 @@ public class LevelDBState implements State {
 		} 
 		
 		return false;
+	}
+	
+	public Collection<String> foundRecordsByState(byte state) {
+		
+		Collection<String> urls = new LinkedHashSet<String>();
+		try {
+			DBIterator iterator = db.iterator();
+			for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+				Map.Entry<byte[] , byte[]> entry = iterator.peekNext();
+				String key = Iq80DBFactory.asString(entry.getKey());
+				byte value = entry.getValue()[0];
+				
+				if ( state  == value) {
+					// --- add to list ---
+					urls.add( key );
+				}
+			}	
+
+
+		} catch (DBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return urls;
+				
 	}
 
 	@Override

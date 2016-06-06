@@ -2,6 +2,7 @@ package com.ma.bi.webcralwer;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,14 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		
 		try {
 			
+			Calendar cale = Calendar.getInstance();
+			int weekNum  = cale.get( Calendar.WEEK_OF_YEAR );
+			int yearNum = cale.get( Calendar.YEAR );			
+			StringBuilder dateString = new StringBuilder();
+			dateString.append(yearNum).append(weekNum);
+
+			
+			
 			for (Map.Entry<String, List<PreLoadProcRecord>>  prmEntry : rpm.entrySet()  ) {
 
 				String nameSpace = prmEntry.getKey();
@@ -49,21 +58,33 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 				if (!namespaceDir.exists()) {
 					namespaceDir.mkdirs();
 				}
-				State stateInst = createState(namespaceDir);
-				DataRepo dataRepo = createDataRepo(namespaceDir);
+				
+				LevelDBState stateInst = createState(namespaceDir,dateString.toString());
+				DataRepo dataRepo = createDataRepo(namespaceDir , dateString.toString());
 				
 				ProcessorContextImpl pci = new ProcessorContextImpl();
 				pci.setState( stateInst );
-				
+				pci.setDataRepo( dataRepo );
 				List<PreLoadProcRecord> recs =  prmEntry.getValue();
 				
+				stateInst.open();
+				Collection<String> needToLoads = stateInst.foundRecordsByState( State.PENDING );
+				stateInst.close();
+			
 				for ( Iterator<PreLoadProcRecord> pprIter = recs.iterator() ; pprIter.hasNext() ; ) {
 					PreLoadProcRecord ppr = pprIter.next();
 					
-					Spider spiderInst = createSpiderForProcessor(ppr , pci);
+					Spider spiderInst = null;
+					if (needToLoads.isEmpty()) {
+						spiderInst = createSpiderForProcessor(ppr , pci);
+					} else {
+						spiderInst = createSpiderForProcessor(ppr , pci , needToLoads);
+					}
+					
 					spiderInst.thread(5);
 					prepareSpiders.add( spiderInst );
 				}
+
 				
 			}
 			
@@ -95,9 +116,23 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 	}
 	
 	
-	private State createState(File namespaceDir) {
+	private Spider createSpiderForProcessor(PreLoadProcRecord preloadProcRecord , ProcessorContextImpl pci , Collection<String> urls) throws InstantiationException, IllegalAccessException {
+		AbstractPageEntryProcessor  proc =  preloadProcRecord.getBaseClass().newInstance();
+		proc.setProcessorContext( pci );
 		
-		File stateFolder = new File(namespaceDir , "state");
+		Spider inst = Spider.create(proc);
+		
+		for (String url : urls) {
+			inst.addUrl( url );
+		}
+
+		return inst;
+	}	
+	
+	
+	private LevelDBState createState(File namespaceDir,  String dateString) {
+		
+		File stateFolder = new File(namespaceDir , dateString+"_state");
 		
 		Options options = new Options();
 		
@@ -116,16 +151,11 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		
 	}
 	
-	private DataRepo createDataRepo(File namespaceDir) {
-		Calendar cale = Calendar.getInstance();
-		int weekNum  = cale.get( Calendar.WEEK_OF_YEAR );
-		int yearNum = cale.get( Calendar.YEAR );
+	private DataRepo createDataRepo(File namespaceDir, String dateString) {
+
+		dateString = dateString+".txt";
 		
-		StringBuilder file = new StringBuilder();
-		file.append(yearNum).append(weekNum);
-		file.append(".txt");
-		
-		File currentTxt = new File(namespaceDir , file.toString());
+		File currentTxt = new File(namespaceDir , dateString);
 		// --- create file ---
 		
 		FileDataRepo fdr = new FileDataRepo(currentTxt);
