@@ -104,7 +104,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		} else {
 			options.createIfMissing(true);				
 		}
-		
+
 		
 		LevelDBState state = new LevelDBState(stateFolder , options);
 	
