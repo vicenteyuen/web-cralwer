@@ -45,12 +45,9 @@ public class FileDataRepo implements DataRepo {
 
 			AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(
 					dataFile.toPath(), StandardOpenOption.WRITE);
-
+			
+			long position = dataFile.length();
 			ByteBuffer buffer = ByteBuffer.allocate(4096);
-			long position = 150;
-			
-			
-			
 			// --- convert to handle ---
 			StringBuilder lineContent = null;
 			Iterator<String[]> contentIter = lines.iterator();
@@ -65,8 +62,12 @@ public class FileDataRepo implements DataRepo {
 					lineContent.append( colField );
 				}
 				
-				lineContent.append("\n\r");
+				if (position > 0) {
+					lineContent.insert(0, "\r\n");
+				}
 			}
+			
+			
 			
 			buffer.put(lineContent.toString().getBytes());
 			buffer.flip();
@@ -98,6 +99,8 @@ public class FileDataRepo implements DataRepo {
 							exc.printStackTrace();
 						}
 					});
+			
+			fileChannel.close();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

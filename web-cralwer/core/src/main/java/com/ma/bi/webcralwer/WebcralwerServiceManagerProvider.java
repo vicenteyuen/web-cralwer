@@ -54,7 +54,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 				
 				ProcessorContextImpl pci = new ProcessorContextImpl();
 				pci.setState( stateInst );
-				
+				pci.setDataRepo( dataRepo );
 				List<PreLoadProcRecord> recs =  prmEntry.getValue();
 				
 				for ( Iterator<PreLoadProcRecord> pprIter = recs.iterator() ; pprIter.hasNext() ; ) {

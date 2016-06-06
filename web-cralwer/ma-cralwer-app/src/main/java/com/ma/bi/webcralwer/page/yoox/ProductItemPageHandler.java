@@ -3,6 +3,8 @@
  */
 package com.ma.bi.webcralwer.page.yoox;
 
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.Iterator;
 
 import org.jsoup.nodes.Document;
@@ -41,6 +43,9 @@ public class ProductItemPageHandler implements PageHandler {
 		// TODO Auto-generated method stub
 		this.context = procContext;
 	}
+	
+	
+	private DecimalFormat df_inst_0 = new DecimalFormat("¥ 00,000.0");
 
 
 	/* (non-Javadoc)
@@ -69,7 +74,14 @@ public class ProductItemPageHandler implements PageHandler {
 		for (Iterator<Element> elesIter = priceElems.iterator(); elesIter.hasNext();) {
 			Element elem = elesIter.next();
 			String price = elem.text();
-			priceStr.append(price);
+			
+			try {
+				Number num = df_inst_0.parse(price);
+				priceStr.append("¥").append(num);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		StringBuilder nameStr = new StringBuilder();
@@ -84,7 +96,7 @@ public class ProductItemPageHandler implements PageHandler {
 		Elements imgElems = doc.select("img.color");
 		for (Iterator<Element> elesIter = imgElems.iterator(); elesIter.hasNext();) {
 			Element elem = elesIter.next();
-			String color = elem.text();
+			String color = elem.attr("title");
 			if (colorStr.length() > 0) {
 				colorStr.append("|");
 			}
@@ -109,7 +121,7 @@ public class ProductItemPageHandler implements PageHandler {
 		// --- open save file ---
 		dr.open();
 		
-		String[] record = new String[]{nameStr.toString(),brandStr.toString(),priceStr.toString(),colorStr.toString(), linkStr.toString() };
+		String[] record = new String[]{nameStr.toString(),brandStr.toString(),priceStr.toString(),colorStr.toString(), linkStr.toString(),"male"};
 		dr.addOne(record);
 		
 		dr.commit(new ResultCallback() {
