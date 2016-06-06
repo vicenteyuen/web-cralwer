@@ -9,5 +9,8 @@ public interface ProcessorContext {
 	
 	
 	State getState();
+	
+	
+	DataRepo getDataRepo();
 
 }

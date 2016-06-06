@@ -5,6 +5,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-  	<module>processor-service</module>
+  	<module>core</module>
+  	<module>ma-cralwer-app</module>
   </modules>
 </project>

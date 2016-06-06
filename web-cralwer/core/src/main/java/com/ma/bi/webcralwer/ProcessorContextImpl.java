@@ -25,5 +25,18 @@ class ProcessorContextImpl implements ProcessorContext {
 	}
 	
 	
+	private DataRepo dataRepo;
+
+	@Override
+	public DataRepo getDataRepo() {
+		// TODO Auto-generated method stub
+		return dataRepo;
+	}
+	
+	void setDataRepo(DataRepo dataRepo) {
+		this.dataRepo = dataRepo;
+	}
+	
+	
 
 }

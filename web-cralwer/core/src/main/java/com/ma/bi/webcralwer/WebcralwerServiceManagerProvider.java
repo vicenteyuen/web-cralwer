@@ -1,6 +1,7 @@
 package com.ma.bi.webcralwer;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 					namespaceDir.mkdirs();
 				}
 				State stateInst = createState(namespaceDir);
-				
+				DataRepo dataRepo = createDataRepo(namespaceDir);
 				
 				ProcessorContextImpl pci = new ProcessorContextImpl();
 				pci.setState( stateInst );
@@ -67,6 +68,9 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 			}
 			
 			wsmi.setPreparedSpiders( prepareSpiders );
+			
+			
+			
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,5 +115,24 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		return state;
 		
 	}
+	
+	private DataRepo createDataRepo(File namespaceDir) {
+		Calendar cale = Calendar.getInstance();
+		int weekNum  = cale.get( Calendar.WEEK_OF_YEAR );
+		int yearNum = cale.get( Calendar.YEAR );
+		
+		StringBuilder file = new StringBuilder();
+		file.append(yearNum).append(weekNum);
+		file.append(".txt");
+		
+		File currentTxt = new File(namespaceDir , file.toString());
+		// --- create file ---
+		
+		FileDataRepo fdr = new FileDataRepo(currentTxt);
+		
+
+		return fdr;
+	}
+	
 
 }

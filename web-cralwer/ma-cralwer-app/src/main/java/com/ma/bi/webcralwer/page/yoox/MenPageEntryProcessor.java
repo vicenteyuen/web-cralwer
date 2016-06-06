@@ -15,6 +15,9 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 
 import com.ma.bi.webcralwer.AbstractPageEntryProcessor;
+import com.ma.bi.webcralwer.PageHandler;
+import com.ma.bi.webcralwer.ProcessorContext;
+import com.ma.bi.webcralwer.State;
 
 /**
  * @author vison
@@ -55,46 +58,51 @@ public class MenPageEntryProcessor extends AbstractPageEntryProcessor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		
 		// --- skip handle ---
 		if (url == null) {
 			return;
 		}
+
+		ProcessorContext  procContext =  this.getContext();
 		
+
 		// --- check match url ---
-		/*
 
 		PageHandler pmHandler = null;
 		String path = "/cn/男士";
 		if (url.getPath().equals(path)) {
 			// --- handle processor ---
 			pmHandler = new MenPageHandler();
-			pmHandler.setState(state);
+			pmHandler.setProcessorContext(procContext);
 			pmHandler.handle( page );
 			
 			
 			// --- break handle ---
 			return;
 		}
+
 		
 		path = "/cn/男士/shoponline/";
 		if (url.getPath().startsWith(path)) {
 			
 			pmHandler = new ShopOnlinePageHandler();
-			pmHandler.setState(state);
+			pmHandler.setProcessorContext(procContext);
 			pmHandler.handle( page );		
 			return;
 		}
 		
 		if (matchProductItemUrl(url)) {
 			pmHandler = new ProductItemPageHandler();
-			pmHandler.setState(state);
+			pmHandler.setProcessorContext(procContext);
 			pmHandler.handle( page );		
 			return;
 			
 		}
 		
+		State state = procContext.getState();
+		
+		state.open();
 		
 		// --- update state after process html --
 		try {
@@ -102,7 +110,11 @@ public class MenPageEntryProcessor extends AbstractPageEntryProcessor {
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
+		
+		state.commit();
+		
+		state.close();
 		
 
 		

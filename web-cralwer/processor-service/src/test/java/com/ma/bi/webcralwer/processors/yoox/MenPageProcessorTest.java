@@ -3,8 +3,15 @@
  */
 package com.ma.bi.webcralwer.processors.yoox;
 
-import us.codecraft.webmagic.Site;
+import java.io.File;
+
+import org.iq80.leveldb.Options;
+
 import us.codecraft.webmagic.Spider;
+
+import com.ma.bi.webcralwer.State;
+import com.ma.bi.webcralwer.handle.LevelDBStateFactory;
+import com.ma.bi.webcralwer.page.yoox.YooxMenPageEntryProcessor;
 
 /**
  * @author vison
@@ -19,9 +26,17 @@ public class MenPageProcessorTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		File dataDir = new File("testBaseDir");
+		Options options = new Options();
+		options.createIfMissing(true);
+		
+		State state = LevelDBStateFactory.newLevelDbStateInstance(dataDir, options);
 		
 		// --- test class ---
 		YooxMenPageEntryProcessor pp = new YooxMenPageEntryProcessor();
+		pp.setState( state );
+		
+		
 		
 		Spider.create(pp)
         //从 男士下的品牌开始获取数据
