@@ -14,6 +14,12 @@
   		<groupId>us.codecraft</groupId>
   		<artifactId>webmagic-core</artifactId>
   		<version>${webmagic.version}</version>
+  		<exclusions>
+  			<exclusion>
+  				<artifactId>slf4j-log4j12</artifactId>
+  				<groupId>org.slf4j</groupId>
+  			</exclusion>
+  		</exclusions>
   	</dependency>
   	<dependency>
   		<groupId>us.codecraft</groupId>
@@ -46,6 +52,11 @@
   		<groupId>org.iq80.leveldb</groupId>
   		<artifactId>leveldb</artifactId>
   		<version>0.7</version>
-  	</dependency>  	  	
+  	</dependency>
+   	<dependency>
+  		<groupId>com.google.inject</groupId>
+  		<artifactId>guice</artifactId>
+  		<version>4.0</version>
+  	</dependency> 	  	  	
   </dependencies>
 </project>
