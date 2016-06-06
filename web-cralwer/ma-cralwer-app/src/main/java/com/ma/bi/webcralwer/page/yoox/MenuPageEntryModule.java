@@ -80,8 +80,9 @@ public class MenuPageEntryModule extends AbstractModule {
 			this.bind(Map.class).annotatedWith(Names.named("env.conf")).toInstance(globalEnv);
 			
 			// --- bind state ---
-			//this.bind(State.class).toProvider( LevelDBStateProvider.class );
 			this.bind(WebcralwerServiceManager.class).toProvider(WebcralwerServiceManagerProvider.class);
+			
+			
 			
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
