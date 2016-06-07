@@ -18,6 +18,17 @@ public interface State {
 	boolean update(byte[] key , byte state);
 	
 	/**
+	 * define mapping key , update values 
+	 * @param key
+	 * @param values
+	 * @return
+	 */
+	boolean update(byte[] key , byte[] values);
+	
+	
+	byte[] get(byte[] key);
+	
+	/**
 	 * get all state 
 	 * @param state
 	 * @return

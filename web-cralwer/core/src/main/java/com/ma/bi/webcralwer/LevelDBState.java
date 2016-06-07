@@ -10,6 +10,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
+import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 
@@ -42,6 +43,24 @@ public class LevelDBState implements State {
 		return false;
 	}
 	
+	
+	
+	@Override
+	public boolean update(byte[] key, byte[] values) {
+		// TODO Auto-generated method stub
+		try {
+			
+			// --- first value is state value , second value is position
+			batch.put(key,	new byte[]{values[0], values[1]});
+			return true;
+		} catch (DBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+		return false;
+	}
+
 	public Collection<String> foundRecordsByState(byte state) {
 		
 		Collection<String> urls = new LinkedHashSet<String>();
@@ -63,10 +82,28 @@ public class LevelDBState implements State {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return urls;
-				
 	}
+
+
+	
+	
+	@Override
+	public byte[] get(byte[] key) {
+		// TODO Auto-generated method stub
+		byte[] value = null;
+		try {
+			// --- first value is state value , second value is position
+			value = db.get(key);
+		} catch (DBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return value;
+	}
+	
+	private WriteBatch batch = null;
 
 	@Override
 	public void open() {
@@ -75,6 +112,11 @@ public class LevelDBState implements State {
 		// --- create tmp example ---
 		try {
 			this.db = Iq80DBFactory.factory.open(dataDir, options);
+			
+			
+			// --- create write batch ---
+			batch = this.db.createWriteBatch();
+			
 		} catch (DBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -91,7 +133,11 @@ public class LevelDBState implements State {
 	@Override
 	public void commit() {
 		// TODO Auto-generated method stub
-		
+		if (null != this.batch ) {
+			
+			db.write(this.batch);
+			
+		}
 	}
 
 	@Override

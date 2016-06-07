@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,6 +32,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 	@Inject
 	private Map globalConf;
 	
+	private Lock lock = new ReentrantLock();
 	
 	@Override
 	public WebcralwerServiceManager get() {
@@ -49,7 +52,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 			dateString.append(yearNum).append(weekNum);
 
 			
-			
+			// --- list record list --
 			for (Map.Entry<String, List<PreLoadProcRecord>>  prmEntry : rpm.entrySet()  ) {
 
 				String nameSpace = prmEntry.getKey();
@@ -61,16 +64,22 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 				
 				LevelDBState stateInst = createState(namespaceDir,dateString.toString());
 				DataRepo dataRepo = createDataRepo(namespaceDir , dateString.toString());
+				JsonTraceAttr jta =  createTraceAttr(namespaceDir , dateString.toString());
 				
+				
+				// --- start handle ---
 				ProcessorContextImpl pci = new ProcessorContextImpl();
 				pci.setState( stateInst );
 				pci.setDataRepo( dataRepo );
-				List<PreLoadProcRecord> recs =  prmEntry.getValue();
-				
+				pci.setTraceAttr( jta );
+				pci.setLock(lock);
+
 				stateInst.open();
 				Collection<String> needToLoads = stateInst.foundRecordsByState( State.PENDING );
 				stateInst.close();
-			
+				
+				List<PreLoadProcRecord> recs =  prmEntry.getValue();
+							
 				for ( Iterator<PreLoadProcRecord> pprIter = recs.iterator() ; pprIter.hasNext() ; ) {
 					PreLoadProcRecord ppr = pprIter.next();
 					
@@ -81,11 +90,28 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 						spiderInst = createSpiderForProcessor(ppr , pci , needToLoads);
 					}
 					
+					/*
+					SpiderListener sl = new SpiderListener() {
+
+						@Override
+						public void onSuccess(Request request) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void onError(Request request) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+					};
+					*/
+
+					spiderInst.setExitWhenComplete(true);
 					spiderInst.thread(5);
 					prepareSpiders.add( spiderInst );
 				}
-
-				
 			}
 			
 			wsmi.setPreparedSpiders( prepareSpiders );
@@ -109,6 +135,7 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		
 		Spider inst = Spider.create(proc);
 		
+
 		for (String url : preloadProcRecord.getUrls()) {
 			inst.addUrl( url );
 		}
@@ -162,6 +189,15 @@ public class WebcralwerServiceManagerProvider implements Provider<WebcralwerServ
 		
 
 		return fdr;
+	}
+	
+	private JsonTraceAttr createTraceAttr(File namespaceDir , String dateString) {
+		dateString = dateString+".ta";
+		File currentFile = new File(namespaceDir , dateString);
+		
+		JsonTraceAttr jta = new JsonTraceAttr(currentFile);
+		
+		return jta;
 	}
 	
 

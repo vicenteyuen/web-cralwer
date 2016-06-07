@@ -7,6 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Collection;
+import java.util.Vector;
+import java.util.concurrent.locks.Lock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 
 import com.ma.bi.webcralwer.AbstractPageEntryProcessor;
+import com.ma.bi.webcralwer.LastRequestListener;
 import com.ma.bi.webcralwer.PageHandler;
 import com.ma.bi.webcralwer.ProcessorContext;
 import com.ma.bi.webcralwer.State;
@@ -70,8 +74,7 @@ public class MenPageEntryProcessor extends AbstractPageEntryProcessor {
 		// --- check match url ---
 
 		PageHandler pmHandler = null;
-		String path = "/cn/男士";
-		if (url.getPath().equals(path)) {
+		if (url.getPath().equals("/cn/男士")) {
 			// --- handle processor ---
 			pmHandler = new MenPageHandler();
 			pmHandler.setProcessorContext(procContext);
@@ -79,19 +82,52 @@ public class MenPageEntryProcessor extends AbstractPageEntryProcessor {
 			
 			
 			// --- break handle ---
-			return;
 		}
-
 		
-		path = "/cn/男士/shoponline/";
-		if (url.getPath().startsWith(path)) {
+		else if (url.getPath().startsWith("/cn/男士/shoponline/")) {
+			
+			ProcessorContext pc =  this.getContext();
+			LastRequestListener lrl = new LastRequestListener() {
+
+				@Override
+				public void fireHandle() {
+					// TODO Auto-generated method stub
+					State state = pc.getState();
+					Lock lock = pc.getLock();
+					
+					Collection<String> urls = new Vector<String>();
+					
+					try {
+						
+						lock.lock();
+						
+						state.open();
+						urls = state.foundRecordsByState(State.PENDING);
+						state.close();
+					} catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+					} finally {
+						lock.unlock();
+					}
+					
+					System.out.println("total record : " + urls.size());
+					
+				}
+				
+			};
+			
 			
 			pmHandler = new ShopOnlinePageHandler();
+
 			pmHandler.setProcessorContext(procContext);
 			pmHandler.handle( page );		
-			return;
+
 		}
 		
+		
+		// --- check the all value item ---
+		/*
 		if (matchProductItemUrl(url)) {
 			pmHandler = new ProductItemPageHandler();
 			pmHandler.setProcessorContext(procContext);
@@ -115,6 +151,7 @@ public class MenPageEntryProcessor extends AbstractPageEntryProcessor {
 		state.commit();
 		
 		state.close();
+		*/
 		
 
 		

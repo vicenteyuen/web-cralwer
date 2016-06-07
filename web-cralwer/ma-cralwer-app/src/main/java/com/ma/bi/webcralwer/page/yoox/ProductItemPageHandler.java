@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
 
 import com.ma.bi.webcralwer.DataRepo;
+import com.ma.bi.webcralwer.LastRequestListener;
 import com.ma.bi.webcralwer.PageHandler;
 import com.ma.bi.webcralwer.ProcessorContext;
 import com.ma.bi.webcralwer.ResultCallback;
@@ -45,6 +46,14 @@ public class ProductItemPageHandler implements PageHandler {
 	}
 	
 	
+	
+	
+	@Override
+	public void setLastRequestListener(LastRequestListener listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private DecimalFormat df_inst_0 = new DecimalFormat("¥ 00,000.0");
 
 

@@ -4,6 +4,7 @@
 package com.ma.bi.webcralwer.page.yoox;
 
 import java.util.Iterator;
+import java.util.concurrent.locks.Lock;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 
+import com.ma.bi.webcralwer.LastRequestListener;
 import com.ma.bi.webcralwer.PageHandler;
 import com.ma.bi.webcralwer.ProcessorContext;
 import com.ma.bi.webcralwer.State;
+import com.ma.bi.webcralwer.TraceAttr;
 
 /**
  * @author ruanweibiao
@@ -42,6 +45,16 @@ public class MenPageHandler implements PageHandler {
 		this.context = procContext;
 	}
 
+	
+
+
+	@Override
+	public void setLastRequestListener(LastRequestListener listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 
 
 	/* (non-Javadoc)
@@ -55,42 +68,54 @@ public class MenPageHandler implements PageHandler {
 		
 		Elements elems = doc.select( "a.topFiltersTracking" );
 		
-		State state = context.getState();
-		state.open();
+		// --- mark state ---
+		TraceAttr ta = context.getTraceAttr();
+		String taKey = "link-level-1";
+		java.io.Serializable taValue = ta.getValue(taKey);
+		int levelCount = null == taValue ? 0 : Integer.parseInt(taValue.toString());
 		
-		Iterator<Element> iter = elems.iterator();
-		while (iter.hasNext()) {
-			Element ele = iter.next();
-			String urlLink = ele.attr("href");
+		Lock lock = context.getLock();
+		
+		lock.lock();
+		
+		try {
+			
+			State state = context.getState();
+			state.open();
+			
+			Iterator<Element> iter = elems.iterator();
+			while (iter.hasNext()) {
+				Element ele = iter.next();
+				String urlLink = ele.attr("href");
 
-			// ---- get the infomation ---
-			
-			String dataType = ele.attr("data-type");
-			Request req = new Request(urlLink);
-			
-			// --- handle brand designer
-			if ( "topDesigners".equalsIgnoreCase(dataType) ) {
+				// ---- get the infomation ---
+				
+				String dataType = ele.attr("data-type");
+				Request req = new Request(urlLink);
+				
+				// --- set the first level ---
+				state.update(urlLink.getBytes(), new byte[]{State.PENDING , 1});
+				// --- add the category and brand --
+				page.addTargetRequest(req);
+				levelCount = levelCount + 1;
+				if (logger.isDebugEnabled()) {
+					logger.debug("Add Request : " + urlLink);
+				}
 				
 			}
-			// ---- handle for categories ----
-			else if ("topCategories".equalsIgnoreCase(dataType) || "categories".equalsIgnoreCase(dataType) ) {
-				
-			}
-
-			state.update(urlLink.getBytes(), State.PENDING);
-			// --- add the category and brand --
-			page.addTargetRequest(req);
 			
-			if (logger.isDebugEnabled()) {
-				logger.debug("Add Request : " + urlLink);
-			}
+			state.commit();
 			
+			state.close();			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			lock.unlock();
 		}
+
+		ta.putValue(taKey, levelCount);
 		
-		state.commit();
-		
-		state.close();
-		
+		ta.flushOrSave();
 	}
 
 }

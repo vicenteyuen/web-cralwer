@@ -43,7 +43,8 @@ public class WebcralwerServiceManagerImpl implements
 		}
 		
 		for (Spider item : prepareSpiders) {
-			item.run();
+			//item.run();
+			item.start();
 		}
 		
 		

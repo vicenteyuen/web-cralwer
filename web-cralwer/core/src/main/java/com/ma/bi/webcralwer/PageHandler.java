@@ -16,6 +16,9 @@ public interface PageHandler{
 	
 	
 	void setProcessorContext(ProcessorContext  procContext);
+	
+	
+	void setLastRequestListener(LastRequestListener listener);
 
 
 }
